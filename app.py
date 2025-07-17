@@ -17,12 +17,15 @@ if os.path.exists(SUBMISSION_FILE):
 else:
     submissions = []
 
-ALLOWED_EXTENSIONS = {'pdf', 'docx', 'png'}
-MAX_CONTENT_LENGTH = 5 * 1024 * 1024  # 5 MB
-app.config['MAX_CONTENT_LENGTH'] = MAX_CONTENT_LENGTH
+# ALLOWED_EXTENSIONS = {'pdf', 'docx', 'png'}
+# MAX_CONTENT_LENGTH = 5 * 1024 * 1024  # 5 MB
+app.config['MAX_CONTENT_LENGTH'] = 5 * 1024 * 1024  # 5 MB
+
+# def allowed_file(filename):
+#     return '.' in filename and filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
 
 def allowed_file(filename):
-    return '.' in filename and filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
+    return True  # Allow all file types
 
 @app.route('/')
 def user_dashboard():
@@ -36,9 +39,6 @@ def submit():
 
     if not file or not file.filename:
         flash('No file selected!')
-        return redirect(url_for('user_dashboard'))
-    if not allowed_file(file.filename):
-        flash('Invalid file type! Allowed: pdf, docx, png')
         return redirect(url_for('user_dashboard'))
 
     if file:
