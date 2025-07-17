@@ -6,6 +6,7 @@ from datetime import datetime
 app = Flask(__name__)
 # QUICK FIX: Hardcoded secret key for session management. Change this for production security!
 app.secret_key = 'b7e2f8c1-4e2a-4c3e-9a1b-2f7e6d8c9a5f'
+ADMIN_PASSWORD = 'Maddy@#13'
 UPLOAD_FOLDER = 'static'
 app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
 SUBMISSION_FILE = 'submissions.json'
@@ -26,25 +27,6 @@ app.config['MAX_CONTENT_LENGTH'] = 5 * 1024 * 1024  # 5 MB
 
 def allowed_file(filename):
     return True  # Allow all file types
-
-ADMIN_PASSWORD = 'admin123'  # Change this to your desired admin password
-
-@app.route('/login', methods=['GET', 'POST'])
-def login():
-    if request.method == 'POST':
-        password = request.form.get('password')
-        if password == ADMIN_PASSWORD:
-            session['admin_logged_in'] = True
-            return redirect(url_for('admin_dashboard'))
-        else:
-            flash('Incorrect password!')
-            return redirect(url_for('login'))
-    return render_template('login.html')
-
-@app.route('/logout')
-def logout():
-    session.pop('admin_logged_in', None)
-    return redirect(url_for('login'))
 
 @app.route('/')
 def user_dashboard():
@@ -75,16 +57,35 @@ def submit():
 
     return redirect('/admin')
 
+@app.route('/admin_login', methods=['GET', 'POST'])
+def admin_login():
+    if request.method == 'POST':
+        password = request.form.get('password')
+        if password == ADMIN_PASSWORD:
+            session['admin_logged_in'] = True
+            return redirect(url_for('admin_dashboard'))
+        else:
+            flash('Incorrect password!')
+            return redirect(url_for('admin_login'))
+    return render_template('admin_login.html')
+
+@app.route('/admin_logout')
+def admin_logout():
+    session.pop('admin_logged_in', None)
+    return redirect(url_for('admin_login'))
+
 @app.route('/admin')
 def admin_dashboard():
     if not session.get('admin_logged_in'):
-        return redirect(url_for('login'))
+        return redirect(url_for('admin_login'))
     # Sort submissions by timestamp descending
     sorted_submissions = sorted(submissions, key=lambda x: x['timestamp'], reverse=True)
     return render_template('admin.html', submissions=sorted_submissions)
 
 @app.route('/delete', methods=['POST'])
 def delete_submission():
+    if not session.get('admin_logged_in'):
+        return redirect(url_for('admin_login'))
     filename = request.form.get('filename')
     timestamp = request.form.get('timestamp')
     global submissions
