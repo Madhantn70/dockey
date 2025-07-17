@@ -5,3 +5,5 @@ Jinja2==3.1.2
 MarkupSafe==2.1.1
 Werkzeug==3.1.0
 # Add any other packages you actually use in your code below
+
+gunicorn
