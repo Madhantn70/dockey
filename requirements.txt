@@ -3,5 +3,5 @@ blinker==1.9.0
 itsdangerous==2.2.0
 Jinja2==3.1.2
 MarkupSafe==2.1.1
-Werkzeug==3.0.1
+Werkzeug==3.1.0
 # Add any other packages you actually use in your code below
