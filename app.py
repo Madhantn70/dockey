@@ -1,4 +1,4 @@
-from flask import Flask, render_template, request, redirect, url_for, flash
+from flask import Flask, render_template, request, redirect, url_for, flash, session
 import os
 import json
 from datetime import datetime
@@ -26,6 +26,25 @@ app.config['MAX_CONTENT_LENGTH'] = 5 * 1024 * 1024  # 5 MB
 
 def allowed_file(filename):
     return True  # Allow all file types
+
+ADMIN_PASSWORD = 'admin123'  # Change this to your desired admin password
+
+@app.route('/login', methods=['GET', 'POST'])
+def login():
+    if request.method == 'POST':
+        password = request.form.get('password')
+        if password == ADMIN_PASSWORD:
+            session['admin_logged_in'] = True
+            return redirect(url_for('admin_dashboard'))
+        else:
+            flash('Incorrect password!')
+            return redirect(url_for('login'))
+    return render_template('login.html')
+
+@app.route('/logout')
+def logout():
+    session.pop('admin_logged_in', None)
+    return redirect(url_for('login'))
 
 @app.route('/')
 def user_dashboard():
@@ -58,6 +77,8 @@ def submit():
 
 @app.route('/admin')
 def admin_dashboard():
+    if not session.get('admin_logged_in'):
+        return redirect(url_for('login'))
     # Sort submissions by timestamp descending
     sorted_submissions = sorted(submissions, key=lambda x: x['timestamp'], reverse=True)
     return render_template('admin.html', submissions=sorted_submissions)
