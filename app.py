@@ -4,6 +4,8 @@ import json
 from datetime import datetime
 
 app = Flask(__name__)
+# QUICK FIX: Hardcoded secret key for session management. Change this for production security!
+app.secret_key = 'b7e2f8c1-4e2a-4c3e-9a1b-2f7e6d8c9a5f'
 UPLOAD_FOLDER = 'static'
 app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
 SUBMISSION_FILE = 'submissions.json'
@@ -69,7 +71,3 @@ def delete_submission():
     with open(SUBMISSION_FILE, 'w') as f:
         json.dump(submissions, f)
     return redirect(url_for('admin_dashboard'))
-
-if __name__ == '__main__':
-    port = int(os.environ.get("PORT", 5000))
-    app.run(host="0.0.0.0", port=port, debug=True)
