@@ -55,10 +55,10 @@ def submit():
         with open(SUBMISSION_FILE, 'w') as f:
             json.dump(submissions, f)
 
-    return redirect('/admin')
+    return redirect('/')
 
-@app.route('/admin_login', methods=['GET', 'POST'])
-def admin_login():
+@app.route('/login', methods=['GET', 'POST'])
+def login():
     if request.method == 'POST':
         password = request.form.get('password')
         if password == ADMIN_PASSWORD:
@@ -66,26 +66,25 @@ def admin_login():
             return redirect(url_for('admin_dashboard'))
         else:
             flash('Incorrect password!')
-            return redirect(url_for('admin_login'))
-    return render_template('admin_login.html')
+            return redirect(url_for('login'))
+    return render_template('login.html')
 
-@app.route('/admin_logout')
-def admin_logout():
+@app.route('/logout')
+def logout():
     session.pop('admin_logged_in', None)
-    return redirect(url_for('admin_login'))
+    flash('Logged out successfully!')
+    return redirect(url_for('login'))
 
 @app.route('/admin')
 def admin_dashboard():
     if not session.get('admin_logged_in'):
-        return redirect(url_for('admin_login'))
+        return redirect(url_for('login'))
     # Sort submissions by timestamp descending
     sorted_submissions = sorted(submissions, key=lambda x: x['timestamp'], reverse=True)
     return render_template('admin.html', submissions=sorted_submissions)
 
 @app.route('/delete', methods=['POST'])
 def delete_submission():
-    if not session.get('admin_logged_in'):
-        return redirect(url_for('admin_login'))
     filename = request.form.get('filename')
     timestamp = request.form.get('timestamp')
     global submissions
